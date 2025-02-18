@@ -1,0 +1,6 @@
+openai
+llama-index
+flask
+pydantic
+sentence-transformers
+transformers
