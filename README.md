@@ -64,6 +64,12 @@ python api/main.py
 
 3. Use Postman to send POST requests to the query endpoint.
 
+Example 1: Asking the chatbot a document specific question
+![what_is_in_chapter_3](https://github.com/user-attachments/assets/a32eb8ad-c924-41df-8b14-dc4ecf6c8dc1)
+Example 2: Asking the chatbot a question out of the document's context
+![what_are_the_top_mods](https://github.com/user-attachments/assets/056f37c7-d460-4f54-87c1-2c5bf9a8c68c)
+
+
 ## Agentic Architecture
 
 This implementation is agentic because it sets up an AI agent that autonomously processes natural language queries using both a pre-trained language model (OpenAI GPT-4) and external tools for specialised knowledge. The agent combines a query engine for the indexed document and a web search tool (Tavily Search Tool). Based on the prompts, the agent first checks the indexed document for information, if it is insufficient, it falls back to the web search tool for answers.
