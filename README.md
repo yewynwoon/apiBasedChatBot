@@ -16,7 +16,7 @@ You'll need the following API keys stored in a `.env` file:
 
 ```plaintext
 OPENAI_API_KEY=your_openai_key_here
-SERPAPI_API_KEY=your_serpapi_key_here
+TAVILY_API_KEY=your_serpapi_key_here
 ```
 
 ## Installation
@@ -63,6 +63,12 @@ python api/main.py
 - Query endpoint: `http://localhost:5000/query`
 
 3. Use Postman to send POST requests to the query endpoint.
+
+Example 1: Asking the chatbot a document specific question
+![what_is_in_chapter_3](https://github.com/user-attachments/assets/a32eb8ad-c924-41df-8b14-dc4ecf6c8dc1)
+Example 2: Asking the chatbot a question out of the document's context
+![what_are_the_top_mods](https://github.com/user-attachments/assets/056f37c7-d460-4f54-87c1-2c5bf9a8c68c)
+
 
 ## Agentic Architecture
 
