@@ -70,6 +70,8 @@ Example 2: Asking the chatbot a question out of the document's context
 ![what_are_the_top_mods](https://github.com/user-attachments/assets/056f37c7-d460-4f54-87c1-2c5bf9a8c68c)
 Example 3: Asking the chatbot to describe zombies
 ![zombie_query](https://github.com/user-attachments/assets/80a62b20-a7b2-44da-90ea-e99c30bc1c99)
+Example 4: Asking the chatbot about the different types of key status indicators on the HUD
+![HUD_indicators](https://github.com/user-attachments/assets/4ce4119c-a1bf-416f-a6dd-b181ce605fe3)
 
 ## Agentic Architecture
 
