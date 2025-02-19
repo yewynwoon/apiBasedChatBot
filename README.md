@@ -1,6 +1,6 @@
 # Introduction
 
-An intelligent chatbot built with Flask API that uses LlamaIndex to query indexed Minecraft guide information using OpenAI's LLM model. The system uses Postman for API interactions and MiniConda for package management.
+An intelligent chatbot built with Flask API that uses LlamaIndex to query indexed Minecraft guide information using OpenAI's LLM model. The system uses Postman for API interactions and MiniConda for package management. For the demonstration of this chatbot, I decided to index the 3rd Chapter of a Minecraft Guide.
 
 ## Features
 
@@ -68,7 +68,8 @@ Example 1: Asking the chatbot a document specific question
 ![what_is_in_chapter_3](https://github.com/user-attachments/assets/a32eb8ad-c924-41df-8b14-dc4ecf6c8dc1)
 Example 2: Asking the chatbot a question out of the document's context
 ![what_are_the_top_mods](https://github.com/user-attachments/assets/056f37c7-d460-4f54-87c1-2c5bf9a8c68c)
-
+Example 3: Asking the chatbot to describe zombies
+![zombie_query](https://github.com/user-attachments/assets/80a62b20-a7b2-44da-90ea-e99c30bc1c99)
 
 ## Agentic Architecture
 
