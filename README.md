@@ -7,9 +7,13 @@ MiniConda is used for package management to avoid clashing Python packages and f
 
 ## Environment Variables
 
-To run this project, you will need an OpenAI API key in the .env file.
+To run this project, you will need an OpenAI API key and a SerpAPI key in the .env file.
 
+1. OpenAI
 ```OPENAI_API_KEY=YOUR_OPEN_AI_KEY```
+
+2. SerpAPI
+```SERPAPI_API_KEY=YOUR_SERPAPI_KEY```
 
 
 

@@ -8,6 +8,7 @@ import openai
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.llms.openai import OpenAI
 from dotenv import load_dotenv
+from serpapi.google_search import GoogleSearch
 
 load_dotenv()
 
@@ -68,6 +69,7 @@ class QASystem:
 
     def query(self, question: str) -> dict:
         try:
+            # First, check local sources (document retrieval)
             response = self.query_engine.query(question)
             source_nodes = []
             if hasattr(response, 'source_nodes'):
@@ -78,17 +80,49 @@ class QASystem:
                         'document': node.node.metadata.get('file_name', 'Unknown')
                     })
             
-            return {
-                'answer': str(response),
-                'source_nodes': source_nodes,
-                'metadata': {
-                    'total_nodes': len(source_nodes),
-                    'response_type': type(response).__name__
+            # 1. Check if the response is empty
+            # 2. Check if the response quality is too low
+            if not str(response).strip() or (source_nodes and all(node['score'] < 0.5 for node in source_nodes)):
+                # If no relevant answer is found, search the web using SerpAPI
+                return self._search_web(question)
+            else:
+                return {
+                    'answer': str(response),
+                    'source_nodes': source_nodes,
+                    'metadata': {
+                        'total_nodes': len(source_nodes),
+                        'response_type': type(response).__name__
+                    }
                 }
-            }
         except Exception as e:
             logger.error(f"Query processing failed: {str(e)}")
             raise
+
+    
+    def _search_web(self, question: str) -> dict:
+        try:
+            search_params = {
+                "q": question + " Minecraft",  # Append "Minecraft" to focus search
+                "hl": "en",
+                "google_domain": "google.com",
+                "api_key": os.getenv("SERPAPI_API_KEY")
+            }
+            
+            search = GoogleSearch(search_params)
+            search_results = search.get_dict()
+            
+            top_result = search_results.get('organic_results', [])[0]
+            logger.info(top_result)
+            
+            return {
+                "answer": top_result['snippet'],
+                "source_url": top_result['link'],
+                "metadata": {"source_title": top_result['title']}
+            }
+        
+        except Exception as e:
+            logger.error(f"Failed to search the web: {str(e)}")
+            return {"error": "Failed to retrieve web search results."}
 
 def create_app(config=None):
     app = Flask(__name__)
