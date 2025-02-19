@@ -22,8 +22,8 @@ class DocumentIngester:
         self,
         data_dir: str = "./data",
         index_dir: str = "./index",
-        openai_api_key: Optional[str] = None,
         embedding_model: str = "text-embedding-3-small"
+
     ):
         self.data_dir = Path(data_dir)
         self.index_dir = Path(index_dir)
@@ -32,9 +32,7 @@ class DocumentIngester:
         self.data_dir.mkdir(exist_ok=True)
         self.index_dir.mkdir(exist_ok=True)
 
-        if openai_api_key:
-            openai.api_key = os.environ["OPENAI_API_KEY"] = openai_api_key
-        elif "OPENAI_API_KEY" in os.environ:
+        if "OPENAI_API_KEY" in os.environ:
             openai.api_key = os.environ["OPENAI_API_KEY"]
         else:
             raise ValueError("OpenAI API key is required for embeddings")
@@ -97,8 +95,7 @@ class DocumentIngester:
 def main():
     ingester = DocumentIngester(
         data_dir="./data",
-        index_dir="./index",
-        openai_api_key=os.getenv("OPENAI_API_KEY")  
+        index_dir="./index"
     )
 
     try:

@@ -18,17 +18,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class QASystem:
-    def __init__(self, index_path: str = "./index/index.pkl", openai_api_key: Optional[str] = None):
+    def __init__(self, index_path: str = "./index/index.pkl"):
         self.index_path = Path(index_path)
         
-        if openai_api_key:
-            openai.api_key = openai_api_key
+        openai_api_key_from_env = os.getenv("OPENAI_API_KEY")
+        if openai_api_key_from_env:
+            openai.api_key = openai_api_key_from_env
         else:
-            openai_api_key_from_env = os.getenv("OPENAI_API_KEY")
-            if openai_api_key_from_env:
-                openai.api_key = openai_api_key_from_env
-            else:
-                raise ValueError("OpenAI API key is required")
+            raise ValueError("OpenAI API key is required")
 
         self.index = self._load_index()
         self.query_engine = self._setup_query_engine()
@@ -53,11 +50,11 @@ class QASystem:
             Settings.llm = llm
             Settings.context_window = 4096
             Settings.num_output = 512
-            Settings.system_prompt = (
-                "You are a helpful AI assistant that answers questions based on the "
-                "provided document context. Always provide clear, concise responses "
-                "and cite specific parts of the document when possible."
-            )
+            # Settings.system_prompt = (
+            #     "You are a helpful AI assistant that answers questions based on the "
+            #     "provided document context. Always provide clear, concise responses "
+            #     "and cite specific parts of the document when possible."
+            # )
             
             query_engine = self.index.as_query_engine(
                 similarity_top_k=3,
@@ -98,12 +95,11 @@ def create_app(config=None):
     
     try:
         qa_system = QASystem(
-            index_path="./index/index.pkl",
-            openai_api_key=None
+            index_path="./index/index.pkl"
         )
-        logger.info("QA System initialized successfully.")
+        logger.info("API has been started")
     except Exception as e:
-        logger.error(f"Failed to initialize QA System: {str(e)}")
+        logger.error(f"Failed to start API service: {str(e)}")
         raise
 
     @app.route('/query', methods=['POST'])

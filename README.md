@@ -1,7 +1,6 @@
-# apiBasedChatBot
+# Introduction
 
- This Flask API based Chatbot aims to utilise OpenAI's LLM Model to index a pdf containing a guide for Minecraft using LlamaIndex.
-For prompts, Postman is used to make API calls to the Chatbot due to its ease of use and GUI.
+This Flask API based Chatbot aims to utilise LLamaIndex to index a pdf containing a guide for Minecraft and query the indexed information using OpenAI's LLM model. For prompts, Postman is used to make API calls to the Chatbot due to its ease of use and GUI.
 
 MiniConda is used for package management to avoid clashing Python packages and for its lightweight nature.
 
@@ -40,3 +39,8 @@ From the root directory, run the following commands :
 ```python api\main.py```
 
 2. Use Postman to send POST requests to API
+
+
+# Agentic Behaviour
+
+For the task of implementing agentic behaviour, I have chosen to implement a web search API using SerpAPI which the model falls back on if it does not find the information in the document provided.
