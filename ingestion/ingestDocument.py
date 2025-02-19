@@ -22,7 +22,7 @@ class DocumentIngester:
         self,
         data_dir: str = "./data",
         index_dir: str = "./index",
-        embedding_model: str = "text-embedding-3-small"
+        embedding_model: str = "text-embedding-ada-002"
 
     ):
         self.data_dir = Path(data_dir)
@@ -42,8 +42,7 @@ class DocumentIngester:
     def _initialize_settings(self):
         try:
             embed_model = OpenAIEmbedding(
-                model=self.embedding_model,
-                dimensions=1536  # dimensions for text-embedding-3-small
+                model=self.embedding_model
             )
             Settings.embed_model = embed_model
             logger.info(f"Initialized OpenAI embedding model: {self.embedding_model}")
