@@ -4,3 +4,4 @@ flask
 pydantic
 sentence-transformers
 transformers
+python-dotenv

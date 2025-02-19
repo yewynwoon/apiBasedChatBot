@@ -7,8 +7,10 @@ from typing import Optional
 import openai
 from llama_index.core import VectorStoreIndex, Settings
 from llama_index.llms.openai import OpenAI
+from dotenv import load_dotenv
 
-# Configure logging
+load_dotenv()
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -16,23 +18,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class QASystem:
-    def __init__(
-        self, 
-        index_path: str = "./index/index.pkl",
-        openai_api_key: Optional[str] = None
-    ):
+    def __init__(self, index_path: str = "./index/index.pkl", openai_api_key: Optional[str] = None):
         self.index_path = Path(index_path)
         
         if openai_api_key:
             openai.api_key = openai_api_key
-        elif "OPENAI_API_KEY" not in os.environ:
-            raise ValueError("OpenAI API key is required")
-        
+        else:
+            openai_api_key_from_env = os.getenv("OPENAI_API_KEY")
+            if openai_api_key_from_env:
+                openai.api_key = openai_api_key_from_env
+            else:
+                raise ValueError("OpenAI API key is required")
+
         self.index = self._load_index()
         self.query_engine = self._setup_query_engine()
 
     def _load_index(self) -> VectorStoreIndex:
-        """Load the saved index from pickle file."""
         try:
             with open(self.index_path, 'rb') as f:
                 index = pickle.load(f)
@@ -43,15 +44,12 @@ class QASystem:
             raise
 
     def _setup_query_engine(self):
-        """Set up the query engine with custom configuration."""
         try:
-            # Initialize LLM
             llm = OpenAI(
                 model="gpt-4-turbo-preview",
                 temperature=0.1
             )
-            
-            # Configure settings
+        
             Settings.llm = llm
             Settings.context_window = 4096
             Settings.num_output = 512
@@ -61,12 +59,10 @@ class QASystem:
                 "and cite specific parts of the document when possible."
             )
             
-            # Create query engine
             query_engine = self.index.as_query_engine(
-                similarity_top_k=3,  # Number of relevant chunks to consider
-                response_mode="compact"  # For concise responses
+                similarity_top_k=3,
+                response_mode="compact"
             )
-            
             return query_engine
             
         except Exception as e:
@@ -74,19 +70,8 @@ class QASystem:
             raise
 
     def query(self, question: str) -> dict:
-        """
-        Process a question and return the answer with metadata.
-        
-        Args:
-            question: The question to answer
-            
-        Returns:
-            dict: Contains answer, source nodes, and metadata
-        """
         try:
             response = self.query_engine.query(question)
-            
-            # Extract source nodes information
             source_nodes = []
             if hasattr(response, 'source_nodes'):
                 for node in response.source_nodes:
@@ -104,7 +89,6 @@ class QASystem:
                     'response_type': type(response).__name__
                 }
             }
-            
         except Exception as e:
             logger.error(f"Query processing failed: {str(e)}")
             raise
@@ -115,37 +99,28 @@ def create_app(config=None):
     try:
         qa_system = QASystem(
             index_path="./index/index.pkl",
-            openai_api_key="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"  # Replace with your API key
+            openai_api_key=None
         )
-        logger.info("Chat Bot has been started successfully")
+        logger.info("QA System initialized successfully.")
     except Exception as e:
-        logger.error(f"Failed to initialize Chat Bot {str(e)}")
+        logger.error(f"Failed to initialize QA System: {str(e)}")
         raise
-
 
     @app.route('/query', methods=['POST'])
     def query():
-        """Handle query requests."""
         try:
             data = request.get_json()
             
             if not data or 'question' not in data:
-                return jsonify({
-                    'error': 'Missing question in request'
-                }), 400
+                return jsonify({'error': 'Missing question in request'}), 400
                 
             question = data['question']
-            
-            # Get response from QA system
             response = qa_system.query(question)
             
             return jsonify(response)
-            
         except Exception as e:
             logger.error(f"Error processing query: {str(e)}")
-            return jsonify({
-                'error': str(e)
-            }), 500
+            return jsonify({'error': str(e)}), 500
 
     return app
 
