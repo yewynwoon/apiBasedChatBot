@@ -65,8 +65,8 @@ class DocumentIngester:
             logger.info(f"Loaded {len(documents)} documents")
 
             node_parser = SimpleNodeParser.from_defaults(
-                chunk_size=1024,
-                chunk_overlap=200
+                chunk_size=512,
+                chunk_overlap=20
             )
             
             index = VectorStoreIndex.from_documents(
