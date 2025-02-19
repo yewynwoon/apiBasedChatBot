@@ -5,10 +5,11 @@ import os
 from pathlib import Path
 from typing import Optional
 import openai
-from llama_index.core import VectorStoreIndex, Settings
+from llama_index.core import VectorStoreIndex, Settings, Document
+from llama_index.tools.tavily_research.base import TavilyToolSpec
 from llama_index.llms.openai import OpenAI
+from llama_index.agent.openai import OpenAIAgent
 from dotenv import load_dotenv
-from serpapi.google_search import GoogleSearch
 
 load_dotenv()
 
@@ -51,11 +52,14 @@ class QASystem:
             Settings.llm = llm
             Settings.context_window = 4096
             Settings.num_output = 512
-            # Settings.system_prompt = (
-            #     "You are a helpful AI assistant that answers questions based on the "
-            #     "provided document context. Always provide clear, concise responses "
-            #     "and cite specific parts of the document when possible."
-            # )
+            Settings.system_prompt = {"You are a helpful assistant specialized in Minecraft. "
+                    "Provide clear, concise answers without using any special formatting or symbols. "
+                "Do not include links, markdown, or bullet points. "
+                "Present information in a natural, flowing way using plain text. "
+                "Focus on essential information and avoid unnecessary structure or lists. "
+                "Write as if you are having a natural conversation."}
+
+
             
             query_engine = self.index.as_query_engine(
                 similarity_top_k=3,
@@ -80,10 +84,33 @@ class QASystem:
                         'document': node.node.metadata.get('file_name', 'Unknown')
                     })
             
-            # 1. Check if the response is empty
-            # 2. Check if the response quality is too low
-            if not str(response).strip() or (source_nodes and all(node['score'] < 0.5 for node in source_nodes)):
-                # If no relevant answer is found, search the web using SerpAPI
+            # Enhanced conditions for resorting to web search:
+            should_search_web = False
+            
+            # 1. Empty response check
+            if not str(response).strip():
+                should_search_web = True
+                logger.info("Empty response, resorting to web search")
+            
+            # 2. Response quality checks
+            elif source_nodes:
+                # Calculate average relevance score
+                valid_scores = [node['score'] for node in source_nodes if node['score'] is not None]
+                avg_score = sum(valid_scores) / len(valid_scores) if valid_scores else 0
+                
+                # Check various quality indicators
+                low_quality_conditions = [
+                    avg_score < 0.3,  # Average relevance too low
+                    all(node['score'] < 0.35 for node in source_nodes if node['score'] is not None),  # All scores too low
+                    len(str(response).split()) < 20,  # Response too short
+                    len(source_nodes) < 2  # Too few source nodes
+                ]
+                
+                if any(low_quality_conditions):
+                    should_search_web = True
+                    logger.info(f"Low quality response (avg_score: {avg_score:.2f}), resorting to web search")
+            
+            if should_search_web:
                 return self._search_web(question)
             else:
                 return {
@@ -101,29 +128,27 @@ class QASystem:
     
     def _search_web(self, question: str) -> dict:
         try:
-            search_params = {
-                "q": question + " Minecraft",  # Append "Minecraft" to focus search
-                "hl": "en",
-                "google_domain": "google.com",
-                "api_key": os.getenv("SERPAPI_API_KEY")
-            }
+            tavily_tool_spec = TavilyToolSpec(
+                api_key=os.getenv("TAVILY_API_KEY")
+            )
+                
+            agent = OpenAIAgent.from_tools(
+                tavily_tool_spec.to_tool_list(),
+                llm=Settings.llm,
+                system_prompt=Settings.system_prompt
+            )
             
-            search = GoogleSearch(search_params)
-            search_results = search.get_dict()
-            
-            top_result = search_results.get('organic_results', [])[0]
-            logger.info(top_result)
-            
+            # Get response from agent
+            minecraft_question = f"Minecraft: {question}"
+            response = agent.chat(minecraft_question)
+                
             return {
-                "answer": top_result['snippet'],
-                "source_url": top_result['link'],
-                "metadata": {"source_title": top_result['title']}
+                "answer": str(response)
             }
-        
+                
         except Exception as e:
-            logger.error(f"Failed to search the web: {str(e)}")
-            return {"error": "Failed to retrieve web search results."}
-
+            logger.error(f"Failed to search using Tavily: {str(e)}")
+            return {"error": f"Failed to retrieve search results: {str(e)}"}
 def create_app(config=None):
     app = Flask(__name__)
     
