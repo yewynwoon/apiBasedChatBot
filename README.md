@@ -1,50 +1,69 @@
 # Introduction
 
-This Flask API based Chatbot aims to utilise LLamaIndex to index a pdf containing a guide for Minecraft and query the indexed information using OpenAI's LLM model. For prompts, Postman is used to make API calls to the Chatbot due to its ease of use and GUI.
+An intelligent chatbot built with Flask API that uses LlamaIndex to query indexed Minecraft guide information using OpenAI's LLM model. The system uses Postman for API interactions and MiniConda for package management.
 
-MiniConda is used for package management to avoid clashing Python packages and for its lightweight nature.
+## Features
 
+- LlamaIndex document indexing
+- OpenAI GPT-4 integration
+- Flask REST API
+- PDF document processing
+- Agentic query processing
 
-## Environment Variables
+## Prerequisites
 
-To run this project, you will need an OpenAI API key and a SerpAPI key in the .env file.
+You'll need the following API keys stored in a `.env` file:
 
-1. OpenAI
-```OPENAI_API_KEY=YOUR_OPEN_AI_KEY```
+```plaintext
+OPENAI_API_KEY=your_openai_key_here
+SERPAPI_API_KEY=your_serpapi_key_here
+```
 
-2. SerpAPI
-```SERPAPI_API_KEY=YOUR_SERPAPI_KEY```
+## Installation
 
+1. Clone the repository:
+```bash
+git clone https://github.com/yewynwoon/apiBasedChatBot.git
+```
 
+2. Create Anaconda environment:
+```bash
+conda create -n llama-env python=3.9
+```
 
-## Environment Setup
+3. Activate environment:
+```bash
+conda activate llama-env
+```
 
-1. Clone the repo
-```git clone https://github.com/yewynwoon/apiBasedChatBot.git```
+4. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-2. Create an Anaconda Environment
- ```conda create -n llama-env python=3.9```
+## Usage
 
-3. Activate the created Anaconda Environment
- ```conda activate llama-env```
+### Document Ingestion
 
-4. Install required packages 
- ```pip install -r requirements.txt```
+1. Process documents from the data folder:
+```bash
+python ingestion/ingestDocument.py
+```
+This creates an index file at `index/index.pkl` for the model to use.
 
+### Running the API
 
-## Ingestion
-From the root directory, run the following commands : 
+1. Start the Flask service:
+```bash
+python api/main.py
+```
 
-1. Ingest documents in data folder
+2. The API will be available at:
+- Base URL: `http://localhost:5000`
+- Query endpoint: `http://localhost:5000/query`
 
-```python ingestion\ingestDocument.py```
-## Query Chatbot
-1. Start Flask API Service
-```python api\main.py```
+3. Use Postman to send POST requests to the query endpoint.
 
-2. Use Postman to send POST requests to API
+## Agentic Architecture
 
-
-# Agentic Behaviour
-
-For the task of implementing agentic behaviour, I have chosen to implement a web search API using SerpAPI which the model falls back on if it does not find the information in the document provided.
+This implementation is agentic because it sets up an AI agent that autonomously processes natural language queries using both a pre-trained language model (OpenAI GPT-4) and external tools for specialised knowledge. The agent combines a query engine for the indexed document and a web search tool (Tavily Search Tool). Based on the prompts, the agent first checks the indexed document for information, if it is insufficient, it falls back to the web search tool for answers.
