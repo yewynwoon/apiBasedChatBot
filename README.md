@@ -16,7 +16,7 @@ You'll need the following API keys stored in a `.env` file:
 
 ```plaintext
 OPENAI_API_KEY=your_openai_key_here
-TAVILY_API_KEY=your_serpapi_key_here
+TAVILY_API_KEY=your_tavily_key_here
 ```
 
 ## Installation
